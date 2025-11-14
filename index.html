@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Checklist Técnicos">
+  
+  <title>Checklist Técnicos - Knight Therapeutics</title>
+  
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- iOS Icons -->
+  <link rel="apple-touch-icon" href="icon-192.png">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="icon-192.png">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    
+    #root {
+      min-height: 100vh;
+    }
+    
+    /* Loading screen */
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      z-index: 9999;
+    }
+    
+    #loading h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    /* Install button */
+    #install-container {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      display: none;
+    }
+    
+    #install-button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 25px;
+      font-size: 16px;
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: transform 0.2s;
+    }
+    
+    #install-button:active {
+      transform: scale(0.95);
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: #667eea;
+      border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+      background: #5568d3;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading Screen -->
+  <div id="loading">
+    <h1>📋 Checklist Técnicos</h1>
+    <div class="spinner"></div>
+    <p style="margin-top: 20px; opacity: 0.8;">Cargando aplicación...</p>
+  </div>
+  
+  <!-- Install Button -->
+  <div id="install-container">
+    <button id="install-button">
+      <span>📲</span>
+      <span>Instalar App</span>
+    </button>
+  </div>
+  
+  <!-- React App Container -->
+  <div id="root"></div>
+  
+  <!-- React and Babel -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Service Worker Registration -->
+  <script>
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('Service Worker registrado:', registration);
+          })
+          .catch(error => {
+            console.log('Error al registrar Service Worker:', error);
+          });
+      });
+    }
+    
+    // PWA Install Prompt
+    let deferredPrompt;
+    
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('install-container').style.display = 'block';
+    });
+    
+    document.getElementById('install-button').addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`User response: ${outcome}`);
+        deferredPrompt = null;
+        document.getElementById('install-container').style.display = 'none';
+      }
+    });
+    
+    window.addEventListener('appinstalled', () => {
+      console.log('PWA instalada exitosamente');
+      document.getElementById('install-container').style.display = 'none';
+    });
+  </script>
+  
+  <!-- React App Component -->
+  <script type="text/babel" data-type="module">
+    const { useState, useEffect } = React;
+    const { Camera, Mail, CheckCircle, Clock, User, Ticket, AlertCircle } = lucide;
+
+    const ChecklistTecnicos = () => {
+      const [formData, setFormData] = useState({
+        nombreTecnico: '',
+        tickets: '',
+        emailDestino: ''
+      });
+
+      const [checklistItems, setChecklistItems] = useState([
+        { id: 1, texto: 'Herramientas necesarias verificadas', completado: false },
+        { id: 2, texto: 'Equipos de protección personal (EPP)', completado: false },
+        { id: 3, texto: 'Documentación del cliente revisada', completado: false },
+        { id: 4, texto: 'Repuestos/materiales necesarios', completado: false },
+        { id: 5, texto: 'Ruta y ubicación del cliente confirmada', completado: false },
+        { id: 6, texto: 'Contacto del cliente verificado', completado: false },
+        { id: 7, texto: 'Backup de datos realizado (si aplica)', completado: false },
+        { id: 8, texto: 'Credenciales de acceso disponibles', completado: false }
+      ]);
+
+      const [historial, setHistorial] = useState([]);
+      const [mostrarHistorial, setMostrarHistorial] = useState(false);
+      const [enviando, setEnviando] = useState(false);
+      const [mensaje, setMensaje] = useState({ tipo: '', texto: '' });
+
+      useEffect(() => {
+        const historialGuardado = localStorage.getItem('historialChecklist');
+        if (historialGuardado) {
+          setHistorial(JSON.parse(historialGuardado));
+        }
+        // Hide loading screen
+        setTimeout(() => {
+          document.getElementById('loading').style.display = 'none';
+        }, 1000);
+      }, []);
+
+      const handleCheckboxChange = (id) => {
+        setChecklistItems(checklistItems.map(item =>
+          item.id === id ? { ...item, completado: !item.completado } : item
+        ));
+      };
+
+      const handleInputChange = (e) => {
+        setFormData({
+          ...formData,
+          [e.target.name]: e.target.value
+        });
+      };
+
+      const generarResumen = () => {
+        const fecha = new Date();
+        const itemsCompletados = checklistItems.filter(item => item.completado);
+        const porcentajeCompletado = Math.round((itemsCompletados.length / checklistItems.length) * 100);
+
+        return {
+          nombreTecnico: formData.nombreTecnico,
+          tickets: formData.tickets,
+          fecha: fecha.toLocaleDateString('es-AR'),
+          hora: fecha.toLocaleTimeString('es-AR'),
+          timestamp: fecha.toISOString(),
+          itemsCompletados: itemsCompletados.length,
+          itemsTotales: checklistItems.length,
+          porcentajeCompletado,
+          detalleChecklist: checklistItems.map(item => ({
+            texto: item.texto,
+            completado: item.completado
+          }))
+        };
+      };
+
+      const generarEmailHTML = (resumen) => {
+        const itemsHTML = resumen.detalleChecklist.map(item => `
+          <tr>
+            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0;">
+              <span style="color: ${item.completado ? '#4CAF50' : '#f44336'}; font-size: 18px;">
+                ${item.completado ? '✓' : '✗'}
+              </span>
+            </td>
+            <td style="padding: 8px; border-bottom: 1px solid #e0e0e0; ${!item.completado ? 'color: #f44336;' : ''}">
+              ${item.texto}
+            </td>
+          </tr>
+        `).join('');
+
+        return `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+              .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px 10px 0 0; text-align: center; }
+              .content { background: white; padding: 30px; border: 1px solid #e0e0e0; border-radius: 0 0 10px 10px; }
+              .info-box { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; }
+              .info-item { margin: 10px 0; }
+              .label { font-weight: bold; color: #667eea; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              .status-ok { color: #4CAF50; font-weight: bold; }
+              .status-pending { color: #f44336; font-weight: bold; }
+              .footer { text-align: center; color: #999; font-size: 12px; margin-top: 20px; }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>📋 Checklist Pre-Visita Técnica</h1>
+              </div>
+              <div class="content">
+                <div class="info-box">
+                  <div class="info-item">
+                    <span class="label">👤 Técnico:</span> ${resumen.nombreTecnico}
+                  </div>
+                  <div class="info-item">
+                    <span class="label">🎫 Tickets:</span> ${resumen.tickets}
+                  </div>
+                  <div class="info-item">
+                    <span class="label">📅 Fecha:</span> ${resumen.fecha}
+                  </div>
+                  <div class="info-item">
+                    <span class="label">⏰ Hora:</span> ${resumen.hora}
+                  </div>
+                  <div class="info-item">
+                    <span class="label">✅ Completado:</span> 
+                    <span class="${resumen.porcentajeCompletado === 100 ? 'status-ok' : 'status-pending'}">
+                      ${resumen.itemsCompletados}/${resumen.itemsTotales} (${resumen.porcentajeCompletado}%)
+                    </span>
+                  </div>
+                </div>
+
+                <h3>Detalle del Checklist:</h3>
+                <table>
+                  <thead>
+                    <tr style="background: #f5f5f5;">
+                      <th style="padding: 10px; text-align: left; width: 50px;">Estado</th>
+                      <th style="padding: 10px; text-align: left;">Item</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${itemsHTML}
+                  </tbody>
+                </table>
+
+                ${resumen.porcentajeCompletado < 100 ? 
+                  '<div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-top: 20px;"><strong>⚠️ Atención:</strong> El checklist no está completado al 100%. Revisar items pendientes antes de la visita.</div>' 
+                  : 
+                  '<div style="background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin-top: 20px;"><strong>✅ Perfecto:</strong> Todos los items han sido verificados. El técnico está listo para la visita.</div>'
+                }
+
+                <div class="footer">
+                  <p>Este email fue generado automáticamente por la App de Checklist de Técnicos de Campo</p>
+                  <p>Knight Therapeutics - IT Service Management</p>
+                </div>
+              </div>
+            </div>
+          </body>
+          </html>
+        `;
+      };
+
+      const enviarEmail = async (resumen) => {
+        const asunto = `Checklist Pre-Visita - ${resumen.nombreTecnico} - Tickets: ${resumen.tickets}`;
+        const cuerpoHTML = generarEmailHTML(resumen);
+        
+        const cuerpoTexto = `
+CHECKLIST PRE-VISITA TÉCNICA
+
+Técnico: ${resumen.nombreTecnico}
+Tickets: ${resumen.tickets}
+Fecha: ${resumen.fecha}
+Hora: ${resumen.hora}
+Completado: ${resumen.itemsCompletados}/${resumen.itemsTotales} (${resumen.porcentajeCompletado}%)
+
+DETALLE DEL CHECKLIST:
+${resumen.detalleChecklist.map(item => 
+  `${item.completado ? '✓' : '✗'} ${item.texto}`
+).join('\n')}
+
+${resumen.porcentajeCompletado < 100 ? 
+  '\n⚠️ ATENCIÓN: El checklist no está completado al 100%' : 
+  '\n✅ Todos los items han sido verificados'
+}
+        `.trim();
+
+        const mailtoLink = `mailto:${encodeURIComponent(formData.emailDestino)}?subject=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpoTexto)}`;
+        
+        window.location.href = mailtoLink;
+
+        return true;
+      };
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!formData.nombreTecnico.trim()) {
+          setMensaje({ tipo: 'error', texto: 'Por favor ingresa el nombre del técnico' });
+          return;
+        }
+
+        if (!formData.tickets.trim()) {
+          setMensaje({ tipo: 'error', texto: 'Por favor ingresa los tickets a resolver' });
+          return;
+        }
+
+        if (!formData.emailDestino.trim()) {
+          setMensaje({ tipo: 'error', texto: 'Por favor ingresa el email de destino' });
+          return;
+        }
+
+        const itemsCompletados = checklistItems.filter(item => item.completado).length;
+        if (itemsCompletados === 0) {
+          setMensaje({ tipo: 'error', texto: 'Por favor completa al menos un item del checklist' });
+          return;
+        }
+
+        setEnviando(true);
+        setMensaje({ tipo: '', texto: '' });
+
+        try {
+          const resumen = generarResumen();
+
+          const nuevoHistorial = [resumen, ...historial];
+          setHistorial(nuevoHistorial);
+          localStorage.setItem('historialChecklist', JSON.stringify(nuevoHistorial));
+
+          await enviarEmail(resumen);
+
+          setMensaje({ 
+            tipo: 'success', 
+            texto: 'Checklist registrado exitosamente. Se abrirá tu cliente de email para enviar el reporte.' 
+          });
+
+          setTimeout(() => {
+            setFormData({ nombreTecnico: '', tickets: '', emailDestino: formData.emailDestino });
+            setChecklistItems(checklistItems.map(item => ({ ...item, completado: false })));
+            setMensaje({ tipo: '', texto: '' });
+          }, 3000);
+
+        } catch (error) {
+          setMensaje({ tipo: 'error', texto: 'Error al procesar el checklist: ' + error.message });
+        } finally {
+          setEnviando(false);
+        }
+      };
+
+      const porcentajeCompletado = Math.round(
+        (checklistItems.filter(item => item.completado).length / checklistItems.length) * 100
+      );
+
+      return (
+        <div style={{ 
+          minHeight: '100vh', 
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          padding: '20px',
+          fontFamily: 'system-ui, -apple-system, sans-serif'
+        }}>
+          <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+            
+            <div style={{ 
+              background: 'white', 
+              borderRadius: '15px 15px 0 0', 
+              padding: '30px',
+              textAlign: 'center',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <h1 style={{ margin: '0 0 10px 0', color: '#667eea', fontSize: '28px' }}>
+                📋 Checklist Técnicos
+              </h1>
+              <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
+                Knight Therapeutics - Pre-Visita de Campo
+              </p>
+            </div>
+
+            <div style={{ 
+              background: 'white', 
+              padding: '30px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <form onSubmit={handleSubmit}>
+                
+                <div style={{ marginBottom: '25px' }}>
+                  <label style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '8px',
+                    color: '#333',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>
+                    <User size={18} style={{ marginRight: '8px', color: '#667eea' }} />
+                    Nombre del Técnico
+                  </label>
+                  <input
+                    type="text"
+                    name="nombreTecnico"
+                    value={formData.nombreTecnico}
+                    onChange={handleInputChange}
+                    placeholder="Ej: Juan Pérez"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      boxSizing: 'border-box',
+                      transition: 'border-color 0.3s'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '25px' }}>
+                  <label style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '8px',
+                    color: '#333',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>
+                    <Ticket size={18} style={{ marginRight: '8px', color: '#667eea' }} />
+                    Tickets a Resolver
+                  </label>
+                  <input
+                    type="text"
+                    name="tickets"
+                    value={formData.tickets}
+                    onChange={handleInputChange}
+                    placeholder="Ej: #12345, #12346, #12347"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '25px' }}>
+                  <label style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '8px',
+                    color: '#333',
+                    fontWeight: '600',
+                    fontSize: '14px'
+                  }}>
+                    <Mail size={18} style={{ marginRight: '8px', color: '#667eea' }} />
+                    Email de Destino
+                  </label>
+                  <input
+                    type="email"
+                    name="emailDestino"
+                    value={formData.emailDestino}
+                    onChange={handleInputChange}
+                    placeholder="supervisor@knight.com"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: '2px solid #e0e0e0',
+                      borderRadius: '8px',
+                      fontSize: '16px',
+                      boxSizing: 'border-box'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#667eea'}
+                    onBlur={(e) => e.target.style.borderColor = '#e0e0e0'}
+                  />
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#333'
+                  }}>
+                    <span>Progreso del Checklist</span>
+                    <span style={{ color: porcentajeCompletado === 100 ? '#4CAF50' : '#667eea' }}>
+                      {porcentajeCompletado}%
+                    </span>
+                  </div>
+                  <div style={{ 
+                    width: '100%', 
+                    height: '12px', 
+                    background: '#e0e0e0', 
+                    borderRadius: '6px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{ 
+                      width: `${porcentajeCompletado}%`, 
+                      height: '100%', 
+                      background: porcentajeCompletado === 100 ? '#4CAF50' : 'linear-gradient(90deg, #667eea 0%, #764ba2 100%)',
+                      transition: 'width 0.3s ease'
+                    }} />
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: '25px' }}>
+                  <h3 style={{ 
+                    marginBottom: '15px', 
+                    color: '#333',
+                    fontSize: '16px',
+                    fontWeight: '600'
+                  }}>
+                    Items de Verificación
+                  </h3>
+                  <div style={{ 
+                    maxHeight: '400px', 
+                    overflowY: 'auto',
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    padding: '10px'
+                  }}>
+                    {checklistItems.map(item => (
+                      <label
+                        key={item.id}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          padding: '12px',
+                          marginBottom: '8px',
+                          background: item.completado ? '#f0f8f0' : 'white',
+                          border: `2px solid ${item.completado ? '#4CAF50' : '#e0e0e0'}`,
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s',
+                          fontSize: '15px'
+                        }}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.completado}
+                          onChange={() => handleCheckboxChange(item.id)}
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            marginRight: '12px',
+                            cursor: 'pointer',
+                            accentColor: '#4CAF50'
+                          }}
+                        />
+                        <span style={{ 
+                          flex: 1,
+                          color: item.completado ? '#2e7d32' : '#333',
+                          textDecoration: item.completado ? 'line-through' : 'none'
+                        }}>
+                          {item.texto}
+                        </span>
+                        {item.completado && (
+                          <CheckCircle size={20} style={{ color: '#4CAF50' }} />
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {mensaje.texto && (
+                  <div style={{
+                    padding: '15px',
+                    marginBottom: '20px',
+                    borderRadius: '8px',
+                    background: mensaje.tipo === 'success' ? '#d4edda' : '#f8d7da',
+                    border: `1px solid ${mensaje.tipo === 'success' ? '#c3e6cb' : '#f5c6cb'}`,
+                    color: mensaje.tipo === 'success' ? '#155724' : '#721c24',
+                    display: 'flex',
+                    alignItems: 'center',
+                    fontSize: '14px'
+                  }}>
+                    {mensaje.tipo === 'success' ? (
+                      <CheckCircle size={20} style={{ marginRight: '10px' }} />
+                    ) : (
+                      <AlertCircle size={20} style={{ marginRight: '10px' }} />
+                    )}
+                    {mensaje.texto}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={enviando}
+                  style={{
+                    width: '100%',
+                    padding: '15px',
+                    background: enviando ? '#ccc' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: enviando ? 'not-allowed' : 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'transform 0.2s',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  {enviando ? (
+                    <>
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        border: '3px solid rgba(255,255,255,0.3)',
+                        borderTopColor: 'white',
+                        borderRadius: '50%',
+                        marginRight: '10px',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      Enviando...
+                    </>
+                  ) : (
+                    <>
+                      <Mail size={20} style={{ marginRight: '10px' }} />
+                      Enviar Checklist
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+
+            <div style={{ 
+              background: 'white', 
+              borderRadius: '0 0 15px 15px',
+              padding: '20px',
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}>
+              <button
+                onClick={() => setMostrarHistorial(!mostrarHistorial)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'white',
+                  color: '#667eea',
+                  border: '2px solid #667eea',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                <Clock size={18} style={{ marginRight: '8px' }} />
+                {mostrarHistorial ? 'Ocultar' : 'Ver'} Historial ({historial.length})
+              </button>
+
+              {mostrarHistorial && (
+                <div style={{ marginTop: '20px' }}>
+                  {historial.length === 0 ? (
+                    <p style={{ textAlign: 'center', color: '#999', padding: '20px' }}>
+                      No hay registros en el historial
+                    </p>
+                  ) : (
+                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                      {historial.map((registro, index) => (
+                        <div
+                          key={index}
+                          style={{
+                            padding: '15px',
+                            marginBottom: '10px',
+                            background: '#f8f9fa',
+                            borderRadius: '8px',
+                            border: '1px solid #e0e0e0',
+                            fontSize: '13px'
+                          }}
+                        >
+                          <div style={{ fontWeight: '600', color: '#333', marginBottom: '8px' }}>
+                            {registro.nombreTecnico}
+                          </div>
+                          <div style={{ color: '#666', marginBottom: '5px' }}>
+                            📅 {registro.fecha} • ⏰ {registro.hora}
+                          </div>
+                          <div style={{ color: '#666', marginBottom: '5px' }}>
+                            🎫 Tickets: {registro.tickets}
+                          </div>
+                          <div style={{ 
+                            display: 'inline-block',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            background: registro.porcentajeCompletado === 100 ? '#d4edda' : '#fff3cd',
+                            color: registro.porcentajeCompletado === 100 ? '#155724' : '#856404'
+                          }}>
+                            {registro.porcentajeCompletado}% Completado
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div style={{ 
+              textAlign: 'center', 
+              marginTop: '20px', 
+              color: 'white',
+              fontSize: '12px',
+              opacity: 0.8
+            }}>
+              <p style={{ margin: '5px 0' }}>💡 Tip: Puedes instalar esta app en tu dispositivo</p>
+              <p style={{ margin: '5px 0' }}>Knight Therapeutics - IT Service Management</p>
+            </div>
+          </div>
+
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      );
+    };
+
+    // Render the app
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<ChecklistTecnicos />);
+  </script>
+</body>
+</html>

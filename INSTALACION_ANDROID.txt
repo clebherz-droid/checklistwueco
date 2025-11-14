@@ -1,0 +1,190 @@
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║      📱 GUÍA RÁPIDA DE INSTALACIÓN EN ANDROID 📱          ║
+║           Checklist Técnicos - Knight Therapeutics        ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+
+
+🚀 OPCIÓN 1: INSTALACIÓN DIRECTA (RECOMENDADA)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Paso 1: SUBIR A UN SERVIDOR WEB
+   • Sube todos los archivos a cualquier hosting gratuito:
+     - GitHub Pages (https://pages.github.com/)
+     - Netlify (https://netlify.com) 
+     - Vercel (https://vercel.com)
+     - Firebase Hosting (https://firebase.google.com)
+
+Paso 2: ABRIR EN ANDROID
+   • Abre Chrome en tu Android
+   • Navega a la URL donde subiste los archivos
+   • Ejemplo: https://tu-usuario.github.io/checklist
+
+Paso 3: INSTALAR LA APP
+   • Toca el menú ⋮ en Chrome
+   • Selecciona "Agregar a pantalla de inicio"
+   • O toca el botón "📲 Instalar App" en la página
+   • Confirma la instalación
+
+Paso 4: ¡LISTO!
+   • La app aparecerá en tu menú de aplicaciones
+   • Ábrela como cualquier otra app
+   • Funciona offline después de la primera carga
+
+
+📡 OPCIÓN 2: SERVIDOR LOCAL PARA TESTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Paso 1: EN TU PC
+   a) Copia todos los archivos en una carpeta
+   b) Abre la carpeta en la terminal/cmd
+   c) Ejecuta uno de estos comandos:
+   
+      Python 3:
+      python -m http.server 8000
+      
+      Python 2:
+      python -m SimpleHTTPServer 8000
+      
+      Node.js (si tienes npx):
+      npx http-server -p 8000
+      
+      PHP:
+      php -S 0.0.0.0:8000
+
+Paso 2: OBTENER LA IP DE TU PC
+   Windows:
+   • Abre cmd y ejecuta: ipconfig
+   • Busca "Dirección IPv4"
+   
+   Mac/Linux:
+   • Abre terminal y ejecuta: ifconfig
+   • Busca "inet" (no inet6)
+   
+   Ejemplo: 192.168.1.100
+
+Paso 3: EN TU ANDROID
+   • Conecta a la misma red WiFi que tu PC
+   • Abre Chrome
+   • Navega a: http://[TU-IP]:8000
+   • Ejemplo: http://192.168.1.100:8000
+
+Paso 4: INSTALAR
+   • Sigue los pasos de instalación de la Opción 1
+
+
+🎯 OPCIÓN 3: GITHUB PAGES (MÁS FÁCIL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Paso 1: CREAR REPOSITORIO EN GITHUB
+   • Ve a https://github.com/new
+   • Nombre: checklist-tecnicos
+   • Público
+   • Crea el repositorio
+
+Paso 2: SUBIR ARCHIVOS
+   • Click en "uploading an existing file"
+   • Arrastra TODOS los archivos de la app
+   • Commit changes
+
+Paso 3: ACTIVAR GITHUB PAGES
+   • Ve a Settings → Pages
+   • Source: Deploy from a branch
+   • Branch: main → / (root)
+   • Save
+
+Paso 4: ACCEDER DESDE ANDROID
+   • Espera 2-3 minutos
+   • URL: https://[TU-USUARIO].github.io/checklist-tecnicos
+   • Instala siguiendo los pasos de Opción 1
+
+
+📝 ARCHIVOS NECESARIOS
+━━━━━━━━━━━━━━━━━━━━━━
+
+✓ index.html              (Archivo principal)
+✓ manifest.json           (Configuración PWA)
+✓ service-worker.js       (Funcionalidad offline)
+✓ icon-192.png           (Icono pequeño)
+✓ icon-512.png           (Icono grande)
+
+IMPORTANTE: Todos los archivos deben estar en la misma carpeta
+
+
+🔧 VERIFICACIÓN DE INSTALACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ ¿Puedes abrir la URL en Chrome?
+✓ ¿Ves el mensaje "Instalar App"?
+✓ ¿La app aparece en tu cajón de aplicaciones?
+✓ ¿Se abre en pantalla completa (sin barra del navegador)?
+✓ ¿Funciona sin internet después de la primera carga?
+
+
+❓ PROBLEMAS COMUNES
+━━━━━━━━━━━━━━━━━━━
+
+🔴 "No veo el botón de Instalar App"
+   ➜ Usa Chrome (no Firefox/Opera)
+   ➜ Asegúrate de estar en HTTPS o localhost
+   ➜ Intenta desde el menú: "Agregar a pantalla de inicio"
+
+🔴 "El email no se abre"
+   ➜ Instala Gmail o cualquier app de email
+   ➜ Configura una cuenta de email en tu dispositivo
+   ➜ Los datos se guardan igual en el historial
+
+🔴 "Los datos se borran"
+   ➜ No uses modo incógnito
+   ➜ No borres los datos del navegador
+   ➜ Verifica permisos de almacenamiento
+
+🔴 "No funciona offline"
+   ➜ Abre la app al menos 1 vez con internet
+   ➜ Espera que cargue completamente
+   ➜ Cierra y reabre la app
+
+
+💡 CONSEJOS PRO
+━━━━━━━━━━━━━━━
+
+1. 📱 ACCESO DIRECTO
+   • Arrastra el ícono a tu pantalla principal
+   • Crear una carpeta "Trabajo" con todas tus apps
+
+2. 💾 RESPALDO DE DATOS
+   • Periódicamente toma capturas del historial
+   • Exporta o copia manualmente si es crítico
+
+3. 🔄 ACTUALIZACIONES
+   • Si hay una nueva versión, solo recarga la página
+   • O desinstala y reinstala la app
+
+4. ⚡ RENDIMIENTO
+   • Limpia el historial periódicamente si crece mucho
+   • Cierra otras apps para mejor performance
+
+5. 🔒 SEGURIDAD
+   • No compartas el dispositivo desbloqueado
+   • Los datos están solo en tu dispositivo
+   • No se sincronizan con la nube
+
+
+📞 SOPORTE
+━━━━━━━━━━━
+
+Si tienes problemas:
+1. Lee esta guía completamente
+2. Verifica la sección de Problemas Comunes
+3. Contacta a IT Service Management
+
+
+════════════════════════════════════════════════════════════
+
+           ✅ ¡Listo para trabajar en campo! ✅
+      
+      Knight Therapeutics - IT Service Management
+                    Versión 1.0.0
+
+════════════════════════════════════════════════════════════
