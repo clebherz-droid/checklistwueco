@@ -1,4 +1,4 @@
-# 📋 Checklist Técnicos - Knight Therapeutics
+# 📋 Checklist Técnicos 
 
 Aplicación móvil para Android que permite a los técnicos de campo completar un checklist antes de visitar a un cliente, con envío automático de email y registro de información.
 
